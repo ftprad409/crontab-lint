@@ -1,38 +1,42 @@
-"""Format lint results and conflicts for CLI output."""
-
+"""Format output for the crontab-lint CLI."""
 from typing import List
 from .conflict_detector import Conflict
+from .summarizer import CrontabSummary
 
 
 def format_conflicts(conflicts: List[Conflict]) -> str:
     if not conflicts:
         return "No conflicts detected.\n"
-    lines = [f"Found {len(conflicts)} conflict(s):\n"]
+    lines = ["Conflicts detected:"]
     for c in conflicts:
-        lines.append(f"  [{c.index_a}] {c.expression_a}")
-        lines.append(f"  [{c.index_b}] {c.expression_b}")
-        lines.append(f"  Reason : {c.reason}")
-        lines.append("")
-    return "\n".join(lines)
+        lines.append(f"  - '{c.expression_a}' overlaps with '{c.expression_b}': {c.reason}")
+    return "\n".join(lines) + "\n"
 
 
-def format_validation_result(expression: str, valid: bool, explanation: str = "") -> str:
-    status = "\u2713 VALID" if valid else "\u2717 INVALID"
-    lines = [f"{status}  {expression}"]
-    if explanation:
-        lines.append(f"  {explanation}")
-    return "\n".join(lines)
+def format_validation_result(expression: str, valid: bool, explanation: str) -> str:
+    status = "VALID" if valid else "INVALID"
+    return f"[{status}] {expression}\n  {explanation}\n"
 
 
-def format_lint_report(results: List[dict], conflicts: List[Conflict]) -> str:
-    """Combine validation results and conflict report into a single string."""
-    sections = []
-    sections.append("=== Validation Results ===")
-    for r in results:
-        sections.append(
-            format_validation_result(r["expression"], r["valid"], r.get("explanation", ""))
-        )
+def format_lint_report(expressions: List[str], results: list, conflicts: List[Conflict]) -> str:
+    sections = ["=== Lint Report ==="]
+    for expr, valid, explanation in results:
+        sections.append(format_validation_result(expr, valid, explanation).rstrip())
     sections.append("")
-    sections.append("=== Conflict Detection ===")
-    sections.append(format_conflicts(conflicts))
-    return "\n".join(sections)
+    sections.append(format_conflicts(conflicts).rstrip())
+    return "\n".join(sections) + "\n"
+
+
+def format_summary(summary: CrontabSummary) -> str:
+    lines = [
+        "=== Summary ===",
+        f"  Total expressions : {summary.total}",
+        f"  Valid             : {summary.valid}",
+        f"  Invalid           : {summary.invalid}",
+        f"  Conflicts         : {summary.conflict_count}",
+    ]
+    if summary.invalid_expressions:
+        lines.append("  Invalid entries:")
+        for expr in summary.invalid_expressions:
+            lines.append(f"    - {expr}")
+    return "\n".join(lines) + "\n"
