@@ -7,6 +7,8 @@ from typing import List
 from crontab_lint.summarizer import CrontabSummary
 from crontab_lint.conflict_detector import Conflict
 
+SUPPORTED_FORMATS = ("json", "csv")
+
 
 def export_json(summary: CrontabSummary, conflicts: List[Conflict]) -> str:
     """Serialize summary and conflicts to a JSON string."""
@@ -44,9 +46,24 @@ def export_csv(summary: CrontabSummary, conflicts: List[Conflict]) -> str:
 
 
 def export(fmt: str, summary: CrontabSummary, conflicts: List[Conflict]) -> str:
-    """Dispatch export by format name ('json' or 'csv')."""
+    """Dispatch export by format name.
+
+    Args:
+        fmt: Output format; must be one of 'json' or 'csv'.
+        summary: Aggregated crontab statistics.
+        conflicts: List of detected scheduling conflicts.
+
+    Returns:
+        Formatted string representation of the results.
+
+    Raises:
+        ValueError: If *fmt* is not a supported format.
+    """
     if fmt == "json":
         return export_json(summary, conflicts)
     if fmt == "csv":
         return export_csv(summary, conflicts)
-    raise ValueError(f"Unsupported export format: {fmt!r}")
+    raise ValueError(
+        f"Unsupported export format: {fmt!r}. "
+        f"Supported formats are: {', '.join(SUPPORTED_FORMATS)}"
+    )
