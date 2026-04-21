@@ -17,6 +17,12 @@ def test_format_next_run_invalid():
     assert "bad expr" in line
 
 
+def test_format_next_run_returns_string():
+    """Ensure format_next_run always returns a string regardless of input."""
+    assert isinstance(format_next_run("0 9 * * *", datetime(2024, 1, 1, 9, 0)), str)
+    assert isinstance(format_next_run("bad", None), str)
+
+
 def test_format_schedule_report_header():
     results = [("* * * * *", datetime(2024, 1, 1, 0, 1))]
     report = format_schedule_report(results)
@@ -37,3 +43,9 @@ def test_format_schedule_report_contains_all_entries():
 def test_format_schedule_report_separators():
     report = format_schedule_report([])
     assert report.count("=" * 60) >= 2
+
+
+def test_format_schedule_report_empty_returns_string():
+    """Ensure format_schedule_report returns a string even for empty input."""
+    report = format_schedule_report([])
+    assert isinstance(report, str)
