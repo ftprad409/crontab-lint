@@ -50,6 +50,21 @@ crontab-lint --explain "0 9 * * 1-5"
   → Runs at 09:00 AM, Monday through Friday
 ```
 
+### Example with `--json`
+
+```bash
+crontab-lint --json "*/15 * * * *"
+```
+
+```json
+{
+  "valid": true,
+  "expression": "*/15 * * * *",
+  "explanation": "Runs every 15 minutes",
+  "conflicts": []
+}
+```
+
 ## Why crontab-lint?
 
 - Catches syntax errors before deployment
