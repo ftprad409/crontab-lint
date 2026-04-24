@@ -40,6 +40,10 @@ class ValidationReport:
     def skipped_count(self) -> int:
         return sum(1 for e in self.entries if e.is_comment or e.is_blank)
 
+    def invalid_entries(self) -> List[ValidationEntry]:
+        """Return only the entries that failed validation (excludes comments and blanks)."""
+        return [e for e in self.entries if not e.valid and not e.is_comment and not e.is_blank]
+
 
 def _is_comment(line: str) -> bool:
     return line.strip().startswith("#")
