@@ -49,6 +49,17 @@ def test_next_run_invalid_expression():
     assert next_run("invalid") is None
 
 
+@pytest.mark.parametrize("expression", [
+    "",
+    "* * * *",
+    "* * * * * *",
+    "not a cron",
+])
+def test_next_run_invalid_expressions(expression):
+    """Ensure various malformed expressions all return None."""
+    assert next_run(expression) is None
+
+
 def test_next_run_uses_now_when_no_after(monkeypatch):
     fixed = datetime(2024, 3, 1, 10, 0)
     import crontab_lint.scheduler as sched
