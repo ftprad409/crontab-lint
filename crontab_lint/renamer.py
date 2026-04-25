@@ -31,6 +31,15 @@ def _is_blank(line: str) -> bool:
     return line.strip() == ""
 
 
+def _extract_expr(raw: str) -> str | None:
+    """Return the five-field cron expression from *raw*, or ``None`` if the line
+    has fewer than five whitespace-separated tokens."""
+    parts = raw.split(None, 5)
+    if len(parts) >= 5:
+        return " ".join(parts[:5])
+    return None
+
+
 def rename(
     lines: List[str],
     old_expr: str,
@@ -72,15 +81,14 @@ def rename(
             continue
 
         # Match on the expression portion (first five whitespace-separated tokens)
-        parts = raw.split(None, 5)
-        if len(parts) >= 5:
-            candidate = " ".join(parts[:5])
-            if candidate == old_expr:
-                command = parts[5] if len(parts) == 6 else ""
-                new_line = (new_expr + " " + command).rstrip() if command else new_expr
-                result_lines.append(new_line)
-                replacements.append((lineno, old_expr, new_expr))
-                continue
+        candidate = _extract_expr(raw)
+        if candidate == old_expr:
+            parts = raw.split(None, 5)
+            command = parts[5] if len(parts) == 6 else ""
+            new_line = (new_expr + " " + command).rstrip() if command else new_expr
+            result_lines.append(new_line)
+            replacements.append((lineno, old_expr, new_expr))
+            continue
 
         result_lines.append(raw)
 
